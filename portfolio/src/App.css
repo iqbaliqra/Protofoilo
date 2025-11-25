@@ -1,55 +1,56 @@
-@import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
 
-.dancing_text {
-  font-family: "Dancing Script", cursive;
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
+
+/* Hide Scrollbar Completely */
 ::-webkit-scrollbar {
-  width: 15px;
+  width: 0px;
+  background: transparent;
 }
+
 ::-webkit-scrollbar-track {
-  background: #d1e5ff;
+  background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(#642bff, #ff22e6);
-  border-radius: 7px;
+  background: transparent;
 }
-.text-tubeLight-effect {
-  display: flex;
-  color: #fff;
-  position: relative;
-  text-transform: uppercase;
-  width: 100%;
-  outline: none;
-  overflow-y: hidden;
-  /* -webkit-box-reflect: below -27px linear-gradient(transparent, #ffffff40); */
-  animation: animate 5s linear infinite;
+
+/* Hide scrollbar for Firefox */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-@keyframes animate {
-  0%,
-  18%,
-  20%,
-  50.1%,
-  60%,
-  65.1%,
-  80%,
-  90.1%,
-  92% {
-    color: gray;
-    text-shadow: none;
-  }
-  18.1%,
-  20.1%,
-  30%,
-  50%,
-  60.1%,
-  65%,
-  80.1%,
-  90.1%,
-  92.1%,
-  100% {
-    color: #fff;
-    text-shadow: 0 0 1px rgb(150, 150, 150), 0 0 2px rgb(150, 150, 150),
-      0 0 2px rgb(150, 150, 150), 0 0 5px rgb(150, 150, 150),
-      0 0 20px rgb(150, 150, 150);
-  }
+
+/* Smooth Scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Make specific dark logos visible in dark mode */
+.dark img[alt*="next" i],
+.dark img[alt*="next.js" i],
+.dark img[alt*="nextjs" i],
+.dark img[alt*="express" i],
+.dark img[alt*="express.js" i],
+.dark img[alt*="aws" i] {
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
 }

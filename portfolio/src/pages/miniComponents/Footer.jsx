@@ -2,9 +2,17 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="p-5 mt-6 w-full max-w-[1050px] mx-auto">
-     <hr />
-     <h1 className="text-tubeLight-effect text-3xl mt-5 justify-center sm:justify-start tracking-[8px]">Thanks For Scrolling</h1>
+    <footer className="px-5 sm:px-8 md:px-12 lg:px-16 py-12 w-full max-w-7xl mx-auto mt-16">
+      <div className="h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent mb-8"></div>
+      
+      <div className="text-center space-y-4">
+        <h2 className="text-3xl md:text-4xl font-bold">
+          <span className="gradient-text">Thanks For Scrolling</span>
+        </h2>
+        <p className="text-muted-foreground">
+          © {new Date().getFullYear()} All rights reserved.
+        </p>
+      </div>
     </footer>
   );
 };

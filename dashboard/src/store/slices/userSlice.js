@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "@/lib/axios";
 
 const userSlice = createSlice({
   name: "user",
@@ -10,6 +10,7 @@ const userSlice = createSlice({
     error: null,
     message: null,
     isUpdated: false,
+    authChecked: false, // Track if we've checked authentication at least once
   },
   reducers: {
     loginRequest(state, action) {
@@ -21,6 +22,7 @@ const userSlice = createSlice({
     loginSuccess(state, action) {
       state.loading = false;
       state.isAuthenticated = true;
+      state.authChecked = true;
       state.user = action.payload;
       state.error = null;
     },
@@ -45,19 +47,21 @@ const userSlice = createSlice({
     },
     loadUserRequest(state, action) {
       state.loading = true;
-      state.isAuthenticated = false;
-      state.user = {};
+      state.authChecked = false;
+      // Don't set isAuthenticated to false here - keep current state during check
       state.error = null;
     },
     loadUserSuccess(state, action) {
       state.loading = false;
       state.isAuthenticated = true;
+      state.authChecked = true;
       state.user = action.payload;
       state.error = null;
     },
     loadUserFailed(state, action) {
       state.loading = false;
       state.isAuthenticated = false;
+      state.authChecked = true; // Mark as checked even if it failed
       state.user = {};
       state.error = action.payload;
     },
@@ -112,10 +116,10 @@ const userSlice = createSlice({
 export const login = (email, password) => async (dispatch) => {
   dispatch(userSlice.actions.loginRequest());
   try {
-    const { data } = await axios.post(
-      "https://mern-stack-portfolio-backend-code.onrender.com/api/v1/user/login",
+    const { data } = await axiosInstance.post(
+      "/api/v1/user/login",
       { email, password },
-      { withCredentials: true, headers: { "Content-Type": "application/json" } }
+      { headers: { "Content-Type": "application/json" } }
     );
     dispatch(userSlice.actions.loginSuccess(data.user));
     dispatch(userSlice.actions.clearAllErrors());
@@ -127,22 +131,29 @@ export const login = (email, password) => async (dispatch) => {
 export const getUser = () => async (dispatch) => {
   dispatch(userSlice.actions.loadUserRequest());
   try {
-    const { data } = await axios.get("https://mern-stack-portfolio-backend-code.onrender.com/api/v1/user/me", {
-      withCredentials: true,
-    });
+    const { data } = await axiosInstance.get("/api/v1/user/me");
     dispatch(userSlice.actions.loadUserSuccess(data.user));
     dispatch(userSlice.actions.clearAllErrors());
   } catch (error) {
-    dispatch(userSlice.actions.loadUserFailed(error.response.data.message));
+    // Silently fail if user is not authenticated (no token) or network error
+    // Don't show error for unauthenticated state or when backend is not running
+    if (
+      !error.response ||
+      error.response?.status === 400 ||
+      error.response?.status === 401 ||
+      error.code === "ECONNREFUSED" ||
+      error.message?.includes("Network Error")
+    ) {
+      dispatch(userSlice.actions.loadUserFailed(null));
+    } else {
+      dispatch(userSlice.actions.loadUserFailed(error.response?.data?.message || "Failed to load user"));
+    }
   }
 };
 
 export const logout = () => async (dispatch) => {
   try {
-    const { data } = await axios.get(
-      "https://mern-stack-portfolio-backend-code.onrender.com/api/v1/user/logout",
-      { withCredentials: true }
-    );
+    const { data } = await axiosInstance.get("/api/v1/user/logout");
     dispatch(userSlice.actions.logoutSuccess(data.message));
     dispatch(userSlice.actions.clearAllErrors());
   } catch (error) {
@@ -154,11 +165,10 @@ export const updatePassword =
   (currentPassword, newPassword, confirmNewPassword) => async (dispatch) => {
     dispatch(userSlice.actions.updatePasswordRequest());
     try {
-      const { data } = await axios.put(
-        "https://mern-stack-portfolio-backend-code.onrender.com/api/v1/user/password/update",
+      const { data } = await axiosInstance.put(
+        "/api/v1/user/password/update",
         { currentPassword, newPassword, confirmNewPassword },
         {
-          withCredentials: true,
           headers: { "Content-Type": "application/json" },
         }
       );
@@ -174,11 +184,10 @@ export const updatePassword =
 export const updateProfile = (data) => async (dispatch) => {
   dispatch(userSlice.actions.updateProfileRequest());
   try {
-    const response = await axios.put(
-      "https://mern-stack-portfolio-backend-code.onrender.com/api/v1/user/me/profile/update",
+    const response = await axiosInstance.put(
+      "/api/v1/user/me/profile/update",
       data,
       {
-        withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       }
     );

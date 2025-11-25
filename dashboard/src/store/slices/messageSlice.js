@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "@/lib/axios";
 
 const messageSlice = createSlice({
   name: "messages",
@@ -56,30 +56,23 @@ const messageSlice = createSlice({
 export const getAllMessages = () => async (dispatch) => {
   dispatch(messageSlice.actions.getAllMessagesRequest());
   try {
-    const response = await axios.get(
-      "https://mern-stack-portfolio-backend-code.onrender.com/api/v1/message/getall",
-      { withCredentials: true }
-    );
+    const response = await axiosInstance.get("/api/v1/message/getall");
     dispatch(
       messageSlice.actions.getAllMessagesSuccess(response.data.messages)
     );
     dispatch(messageSlice.actions.clearAllErrors());
   } catch (error) {
-    dispatch(
-      messageSlice.actions.getAllMessagesFailed(error.response.data.message)
-    );
+    // Handle network errors gracefully
+    const errorMessage = error.response?.data?.message || 
+      (!error.response ? "Unable to connect to server" : "Failed to load messages");
+    dispatch(messageSlice.actions.getAllMessagesFailed(errorMessage));
   }
 };
 
 export const deleteMessage = (id) => async (dispatch) => {
   dispatch(messageSlice.actions.deleteMessageRequest());
   try {
-    const response = await axios.delete(
-      `https://mern-stack-portfolio-backend-code.onrender.com/api/v1/message/delete/${id}`,
-      {
-        withCredentials: true,
-      }
-    );
+    const response = await axiosInstance.delete(`/api/v1/message/delete/${id}`);
     dispatch(messageSlice.actions.deleteMessageSuccess(response.data.message));
     dispatch(messageSlice.actions.clearAllErrors());
   } catch (error) {

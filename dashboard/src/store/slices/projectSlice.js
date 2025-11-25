@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "@/lib/axios";
 
 const projectSlice = createSlice({
   name: "project",
@@ -87,29 +87,26 @@ const projectSlice = createSlice({
 export const getAllProjects = () => async (dispatch) => {
   dispatch(projectSlice.actions.getAllProjectsRequest());
   try {
-    const response = await axios.get(
-      "https://mern-stack-portfolio-backend-code.onrender.com/api/v1/project/getall",
-      { withCredentials: true }
-    );
+    const response = await axiosInstance.get("/api/v1/project/getall");
     dispatch(
       projectSlice.actions.getAllProjectsSuccess(response.data.projects)
     );
     dispatch(projectSlice.actions.clearAllErrors());
   } catch (error) {
-    dispatch(
-      projectSlice.actions.getAllProjectsFailed(error.response.data.message)
-    );
+    // Handle network errors gracefully
+    const errorMessage = error.response?.data?.message || 
+      (!error.response ? "Unable to connect to server" : "Failed to load projects");
+    dispatch(projectSlice.actions.getAllProjectsFailed(errorMessage));
   }
 };
 
 export const addNewProject = (data) => async (dispatch) => {
   dispatch(projectSlice.actions.addNewProjectRequest());
   try {
-    const response = await axios.post(
-      "https://mern-stack-portfolio-backend-code.onrender.com/api/v1/project/add",
+    const response = await axiosInstance.post(
+      "/api/v1/project/add",
       data,
       {
-        withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       }
     );
@@ -124,12 +121,7 @@ export const addNewProject = (data) => async (dispatch) => {
 export const deleteProject = (id) => async (dispatch) => {
   dispatch(projectSlice.actions.deleteProjectRequest());
   try {
-    const response = await axios.delete(
-      `https://mern-stack-portfolio-backend-code.onrender.com/api/v1/project/delete/${id}`,
-      {
-        withCredentials: true,
-      }
-    );
+    const response = await axiosInstance.delete(`/api/v1/project/delete/${id}`);
     dispatch(projectSlice.actions.deleteProjectSuccess(response.data.message));
     dispatch(projectSlice.actions.clearAllErrors());
   } catch (error) {
@@ -141,11 +133,10 @@ export const deleteProject = (id) => async (dispatch) => {
 export const updateProject = (id, newData) => async (dispatch) => {
   dispatch(projectSlice.actions.updateProjectRequest());
   try {
-    const response = await axios.put(
-      `https://mern-stack-portfolio-backend-code.onrender.com/api/v1/project/update/${id}`,
+    const response = await axiosInstance.put(
+      `/api/v1/project/update/${id}`,
       newData,
       {
-        withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       }
     );

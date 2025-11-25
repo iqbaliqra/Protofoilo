@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "@/lib/axios";
 
 const forgotResetPassSlice = createSlice({
   name: "forgotPassword",
@@ -50,10 +50,10 @@ export const forgotPassword = (email) => async (dispatch) => {
   try {
     dispatch(forgotResetPassSlice.actions.forgotPasswordRequest());
     console.log(email);
-    const response = await axios.post(
-      "https://mern-stack-portfolio-backend-code.onrender.com/api/v1/user/password/forgot",
+    const response = await axiosInstance.post(
+      "/api/v1/user/password/forgot",
       { email },
-      { withCredentials: true, headers: { "Content-Type": "application/json" } }
+      { headers: { "Content-Type": "application/json" } }
     );
     console.log(response);
     dispatch(
@@ -73,11 +73,10 @@ export const resetPassword =
   (token, password, confirmPassword) => async (dispatch) => {
     try {
       dispatch(forgotResetPassSlice.actions.resetPasswordRequest());
-      const response = await axios.put(
-        ` https://mern-stack-portfolio-backend-code.onrender.com/api/v1/user/password/reset/${token}`,
+      const response = await axiosInstance.put(
+        `/api/v1/user/password/reset/${token}`,
         { password, confirmPassword },
         {
-          withCredentials: true,
           headers: { "Content-Type": "application/json" },
         }
       );

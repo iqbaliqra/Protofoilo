@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "@/lib/axios";
 
 const softwareApplicationSlice = createSlice({
   name: "softwareApplications",
@@ -73,10 +73,7 @@ export const getAllSoftwareApplications = () => async (dispatch) => {
     softwareApplicationSlice.actions.getAllsoftwareApplicationsRequest()
   );
   try {
-    const response = await axios.get(
-      "https://mern-stack-portfolio-backend-code.onrender.com/api/v1/softwareapplication/getall",
-      { withCredentials: true }
-    );
+    const response = await axiosInstance.get("/api/v1/softwareapplication/getall");
     dispatch(
       softwareApplicationSlice.actions.getAllsoftwareApplicationsSuccess(
         response.data.softwareApplications
@@ -84,9 +81,12 @@ export const getAllSoftwareApplications = () => async (dispatch) => {
     );
     dispatch(softwareApplicationSlice.actions.clearAllErrors());
   } catch (error) {
+    // Handle network errors gracefully
+    const errorMessage = error.response?.data?.message || 
+      (!error.response ? "Unable to connect to server" : "Failed to load software applications");
     dispatch(
       softwareApplicationSlice.actions.getAllsoftwareApplicationsFailed(
-        error.response.data.message
+        errorMessage
       )
     );
   }
@@ -97,11 +97,10 @@ export const addNewSoftwareApplication = (data) => async (dispatch) => {
     softwareApplicationSlice.actions.addNewsoftwareApplicationsRequest()
   );
   try {
-    const response = await axios.post(
-      "https://mern-stack-portfolio-backend-code.onrender.com/api/v1/softwareapplication/add",
+    const response = await axiosInstance.post(
+      "/api/v1/softwareapplication/add",
       data,
       {
-        withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       }
     );
@@ -125,12 +124,7 @@ export const deleteSoftwareApplication = (id) => async (dispatch) => {
     softwareApplicationSlice.actions.deletesoftwareApplicationsRequest()
   );
   try {
-    const response = await axios.delete(
-      `https://mern-stack-portfolio-backend-code.onrender.com/api/v1/softwareapplication/delete/${id}`,
-      {
-        withCredentials: true,
-      }
-    );
+    const response = await axiosInstance.delete(`/api/v1/softwareapplication/delete/${id}`);
     dispatch(
       softwareApplicationSlice.actions.deletesoftwareApplicationsSuccess(
         response.data.message

@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "@/lib/axios";
 
 const skillSlice = createSlice({
   name: "skill",
@@ -86,27 +86,24 @@ const skillSlice = createSlice({
 export const getAllSkills = () => async (dispatch) => {
   dispatch(skillSlice.actions.getAllSkillsRequest());
   try {
-    const response = await axios.get(
-      "https://mern-stack-portfolio-backend-code.onrender.com/api/v1/skill/getall",
-      { withCredentials: true }
-    );
+    const response = await axiosInstance.get("/api/v1/skill/getall");
     dispatch(skillSlice.actions.getAllSkillsSuccess(response.data.skills));
     dispatch(skillSlice.actions.clearAllErrors());
   } catch (error) {
-    dispatch(
-      skillSlice.actions.getAllSkillsFailed(error.response.data.message)
-    );
+    // Handle network errors gracefully
+    const errorMessage = error.response?.data?.message || 
+      (!error.response ? "Unable to connect to server" : "Failed to load skills");
+    dispatch(skillSlice.actions.getAllSkillsFailed(errorMessage));
   }
 };
 
 export const addNewSkill = (data) => async (dispatch) => {
   dispatch(skillSlice.actions.addNewSkillRequest());
   try {
-    const response = await axios.post(
-      "https://mern-stack-portfolio-backend-code.onrender.com/api/v1/skill/add",
+    const response = await axiosInstance.post(
+      "/api/v1/skill/add",
       data,
       {
-        withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       }
     );
@@ -122,11 +119,10 @@ export const addNewSkill = (data) => async (dispatch) => {
 export const updateSkill = (id, proficiency) => async (dispatch) => {
   dispatch(skillSlice.actions.updateSkillRequest());
   try {
-    const response = await axios.put(
-      `https://mern-stack-portfolio-backend-code.onrender.com/api/v1/skill/update/${id}`,
+    const response = await axiosInstance.put(
+      `/api/v1/skill/update/${id}`,
       { proficiency },
       {
-        withCredentials: true,
         headers: { "Content-Type": "application/json" },
       }
     );
@@ -140,12 +136,7 @@ export const updateSkill = (id, proficiency) => async (dispatch) => {
 export const deleteSkill = (id) => async (dispatch) => {
   dispatch(skillSlice.actions.deleteSkillRequest());
   try {
-    const response = await axios.delete(
-      `https://mern-stack-portfolio-backend-code.onrender.com/api/v1/skill/delete/${id}`,
-      {
-        withCredentials: true,
-      }
-    );
+    const response = await axiosInstance.delete(`/api/v1/skill/delete/${id}`);
     dispatch(skillSlice.actions.deleteSkillSuccess(response.data.message));
     dispatch(skillSlice.actions.clearAllErrors());
   } catch (error) {

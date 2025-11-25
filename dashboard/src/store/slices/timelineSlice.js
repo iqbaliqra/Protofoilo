@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "@/lib/axios";
 
 const timelineSlice = createSlice({
   name: "timeline",
@@ -71,29 +71,26 @@ const timelineSlice = createSlice({
 export const getAllTimeline = () => async (dispatch) => {
   dispatch(timelineSlice.actions.getAllTimelineRequest());
   try {
-    const response = await axios.get(
-      "https://mern-stack-portfolio-backend-code.onrender.com/api/v1/timeline/getall",
-      { withCredentials: true }
-    );
+    const response = await axiosInstance.get("/api/v1/timeline/getall");
     dispatch(
       timelineSlice.actions.getAllTimelineSuccess(response.data.timelines)
     );
     dispatch(timelineSlice.actions.clearAllErrors());
   } catch (error) {
-    dispatch(
-      timelineSlice.actions.getAllTimelineFailed(error.response.data.message)
-    );
+    // Handle network errors gracefully
+    const errorMessage = error.response?.data?.message || 
+      (!error.response ? "Unable to connect to server" : "Failed to load timeline");
+    dispatch(timelineSlice.actions.getAllTimelineFailed(errorMessage));
   }
 };
 
 export const addNewTimeline = (data) => async (dispatch) => {
   dispatch(timelineSlice.actions.addNewTimelineRequest());
   try {
-    const response = await axios.post(
-      "https://mern-stack-portfolio-backend-code.onrender.com/api/v1/timeline/add",
+    const response = await axiosInstance.post(
+      "/api/v1/timeline/add",
       data,
       {
-        withCredentials: true,
         headers: { "Content-Type": "application/json" },
       }
     );
@@ -110,12 +107,7 @@ export const addNewTimeline = (data) => async (dispatch) => {
 export const deleteTimeline = (id) => async (dispatch) => {
   dispatch(timelineSlice.actions.deleteTimelineRequest());
   try {
-    const response = await axios.delete(
-      `https://mern-stack-portfolio-backend-code.onrender.com/api/v1/timeline/delete/${id}`,
-      {
-        withCredentials: true,
-      }
-    );
+    const response = await axiosInstance.delete(`/api/v1/timeline/delete/${id}`);
     dispatch(
       timelineSlice.actions.deleteTimelineSuccess(response.data.message)
     );

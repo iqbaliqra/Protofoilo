@@ -26,14 +26,14 @@ import AddProject from "./sub-components/AddProject";
 import AddSoftwareApplications from "./sub-components/AddSoftwareApplications";
 import Account from "./sub-components/Account";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "@/store/slices/userSlice";
+import { logout, clearAllUserErrors } from "@/store/slices/userSlice";
 import { toast } from "react-toastify";
 import Messages from "./sub-components/Messages";
 import AddTimeline from "./sub-components/AddTimeline";
 
 const HomePage = () => {
   const [active, setActive] = useState("");
-  const { isAuthenticated, error, user } = useSelector((state) => state.user);
+  const { isAuthenticated, error, user, loading, authChecked } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const handleLogout = () => {
     dispatch(logout());
@@ -41,14 +41,28 @@ const HomePage = () => {
   };
   const navigateTo = useNavigate();
   useEffect(() => {
-    if (error) {
+    if (error && error !== null) {
       toast.error(error);
       dispatch(clearAllUserErrors());
     }
-    if (!isAuthenticated) {
+    // Only redirect if we've checked authentication AND user is not authenticated
+    // This prevents redirecting before the auth check completes
+    if (authChecked && !loading && !isAuthenticated) {
       navigateTo("/login");
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, error, loading, authChecked, dispatch, navigateTo]);
+
+  // Show loading state while checking authentication
+  if (loading || !authChecked) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-muted/40">
+        <div className="text-center">
+          <div className="mb-4 text-lg">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <aside className="fixed inset-y-0 left-0 hidden w-14 flex-col border-r bg-background sm:flex z-50">

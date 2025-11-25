@@ -73,7 +73,7 @@ const Login = () => {
               <SpecialLoadingButton content={"Loggin In"} />
             ) : (
               <Button
-                onClick={() => handleLogin(email, password)}
+                onClick={handleLogin}
                 className="w-full"
               >
                 Login
